@@ -37,12 +37,21 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Ensure Android Project Files & Gradle Config
+      - name: Ensure Android Project & Force Compile SDK 36
         run: |
           if [ ! -f "android/app/build.gradle" ] && [ ! -f "android/app/build.gradle.kts" ]; then
             echo "Creating Android platform files..."
             flutter create . --platforms=android
           fi
+          
+          # Force compileSdkVersion to 36 in app/build.gradle
+          if [ -f "android/app/build.gradle" ]; then
+            sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 36/g' android/app/build.gradle
+            sed -i 's/compileSdk = [0-9]*/compileSdk = 36/g' android/app/build.gradle
+            sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 36/g' android/app/build.gradle
+            sed -i 's/targetSdk = [0-9]*/targetSdk = 36/g' android/app/build.gradle
+          fi
+
           mkdir -p ~/.gradle
           echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
           echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
