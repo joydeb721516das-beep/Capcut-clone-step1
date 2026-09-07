@@ -37,6 +37,13 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Ensure Android Project Files
+        run: |
+          if [ ! -f "android/app/build.gradle" ] && [ ! -f "android/app/build.gradle.kts" ]; then
+            echo "Android directory missing or incomplete. Recreating Android platform files..."
+            flutter create . --platforms=android
+          fi
+
       - name: Get dependencies
         run: flutter pub get
 
