@@ -37,25 +37,29 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Ensure Android Project & Force Compile SDK 36
+      - name: Configure Android & Force Compile SDK 36 on All Plugins
         run: |
           if [ ! -f "android/app/build.gradle" ] && [ ! -f "android/app/build.gradle.kts" ]; then
-            echo "Creating Android platform files..."
             flutter create . --platforms=android
-          fi
-          
-          # Force compileSdkVersion to 36 in app/build.gradle
-          if [ -f "android/app/build.gradle" ]; then
-            sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 36/g' android/app/build.gradle
-            sed -i 's/compileSdk = [0-9]*/compileSdk = 36/g' android/app/build.gradle
-            sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 36/g' android/app/build.gradle
-            sed -i 's/targetSdk = [0-9]*/targetSdk = 36/g' android/app/build.gradle
           fi
 
           mkdir -p ~/.gradle
           echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
           echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
           echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=1024m" >> ~/.gradle/gradle.properties
+
+          # Sabhi plugins aur subprojects ke compileSdk ko 36 par force karein
+          cat << 'EOF' >> android/build.gradle
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty("android")) {
+                      android {
+                          compileSdkVersion 36
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: Get dependencies
         run: flutter pub get
