@@ -15,12 +15,15 @@ jobs:
 
       - name: Extract project zip
         run: |
+          mkdir -p extracted
           unzip -q capcut_clone_step1.zip -d extracted/
-          if [ -d "extracted/capcut_clone_step1" ]; then
-            cp -r extracted/capcut_clone_step1/* .
-          else
-            cp -r extracted/* .
+          DIR=$(find extracted -name "pubspec.yaml" -exec dirname {} \;)
+          if [ -n "$DIR" ]; then
+            echo "Found project in $DIR, moving to root..."
+            cp -rn "$DIR"/* . || true
+            cp -rn "$DIR"/.* . 2>/dev/null || true
           fi
+          ls -la
 
       - name: Set up Java
         uses: actions/setup-java@v4
